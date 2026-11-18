@@ -54,7 +54,7 @@ func runClusterDemo() {
 			}
 		}
 		nodeID := id
-		nodes[i] = raft.NewNode(nodeID, addrs[i], peers, func(cmd string) {
+		nodes[i] = raft.NewNode(nodeID, addrs[i], peers, func(nodeID, cmd string) {
 			fmt.Printf("[%s] COMMITTED -> spawning isolated container for: %q\n,n", nodeID, cmd)
 			if strings.HasPrefix(cmd, "/bin/") {
 				_ = container.RunParent("./rootfs", []string{"/bin/sh", "-c", strings.TrimPrefix(cmd, "/bin/sh -c ")})
@@ -69,7 +69,7 @@ func runClusterDemo() {
 	time.Sleep(1 * time.Second)
 
 	for _, n := range nodes {
-		if n.Propose("/bin/sh -c echo 'Running inside '$(hostname) ' as PID '$$") {
+		if _, ok := n.Propose("/bin/sh -c echo 'Running_inside_'$(hostname)'_as_PID_'$$"); ok {
 			break
 		}
 	}
